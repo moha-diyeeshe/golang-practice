@@ -1,0 +1,139 @@
+@host = http://localhost:8080
+
+# Paste a current access token here for "manual" requests (or leave empty and use only {{login...}} after running Login)
+@accessToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMSwidHlwZSI6ImFjY2VzcyIsImV4cCI6MTc3NzcyNzczMywiaWF0IjoxNzc3NzI2ODMzLCJqdGkiOiIxNmUzMDM0Zi0zZDVlLTRlOGEtODE0ZC1iMDYxN2RkYjhkMzMifQ.aHrpPK9ZOGXgNyg5TRZdxGzYhF0GdbBqBLtWNsqCIdk
+# authHeader = "Bearer " + accessToken (used by manual requests at bottom)
+@authHeader = Bearer {{accessToken}}
+
+#####################################
+# AUTH — run "Login" once per session so {{login.response.body...}} resolves
+# If variables stay empty: your extension may need the path with $ — try in any protected request:
+#   {{login.response.body.$.access_token}}
+#   {{login.response.body.$.refresh_token}}
+#####################################
+
+### Login
+# @name login
+POST {{host}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "test2@gmail.com",
+  "password": "password123"
+}
+
+### Refresh
+# @name refresh
+POST {{host}}/api/v1/auth/refresh
+Content-Type: application/json
+
+{
+  "refresh_token": "{{login.response.body.refresh_token}}"
+}
+
+### Logout
+POST {{host}}/api/v1/auth/logout
+Authorization: Bearer {{login.response.body.access_token}}
+
+#####################################
+# USERS — public
+#####################################
+
+### Create User
+POST {{host}}/api/v1/users
+Content-Type: application/json
+
+{
+  "username": "testuser2",
+  "email": "test2@gmail.com",
+  "phone": "1112223323",
+  "password": "password123",
+  "is_active": true
+}
+
+#####################################
+# USERS — protected
+#####################################
+
+### List Users
+GET {{host}}/api/v1/users
+Authorization: Bearer {{login.response.body.access_token}}
+
+### Get User by ID
+GET {{host}}/api/v1/users/1
+Authorization: Bearer {{login.response.body.access_token}}
+
+### Update User
+PUT {{host}}/api/v1/users/1
+Authorization: Bearer {{login.response.body.access_token}}
+Content-Type: application/json
+
+{
+  "id": 1,
+  "username": "john_updated",
+  "email": "john_updated@gmail.com",
+  "phone": "999999999",
+  "is_active": true
+}
+
+### Delete User
+DELETE {{host}}/api/v1/users/1
+Authorization: Bearer {{login.response.body.access_token}}
+
+### Activate User
+PATCH {{host}}/api/v1/users/1/activate
+Authorization: Bearer {{login.response.body.access_token}}
+
+### Deactivate User
+PATCH {{host}}/api/v1/users/1/deactivate
+Authorization: Bearer {{login.response.body.access_token}}
+
+#####################################
+# CUSTOMERS — protected (same Bearer as users)
+#####################################
+
+### List customers
+GET {{host}}/api/v1/customers
+Authorization: Bearer {{login.response.body.access_token}}
+
+### Create customer
+POST {{host}}/api/v1/customers
+Authorization: Bearer {{login.response.body.access_token}}
+Content-Type: application/json
+
+{
+  "name": "Acme Corp",
+  "email": "contact@acme.example",
+  "phone": "555-0100",
+  "address": "123 Main St"
+}
+
+### Get customer by ID
+GET {{host}}/api/v1/customers/1
+Authorization: Bearer {{login.response.body.access_token}}
+
+### Update customer
+PUT {{host}}/api/v1/customers/1
+Authorization: Bearer {{login.response.body.access_token}}
+Content-Type: application/json
+
+{
+  "name": "Acme Inc",
+  "email": "new@acme.example"
+}
+
+### Delete customer
+DELETE {{host}}/api/v1/customers/1
+Authorization: Bearer {{login.response.body.access_token}}
+
+#####################################
+# Manual token (set @accessToken at top; no need to run Login in same file)
+#####################################
+
+### List Users (manual Bearer)
+GET {{host}}/api/v1/users
+Authorization: {{authHeader}}
+
+### List customers (manual Bearer)
+GET {{host}}/api/v1/customers
+Authorization: {{authHeader}}

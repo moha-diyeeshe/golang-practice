@@ -1,0 +1,67 @@
+@host = http://localhost:8080
+
+# Optional: paste access token for manual Authorization (or rely on Login below)
+@accessToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMSwidHlwZSI6ImFjY2VzcyIsImV4cCI6MTc3NzcyNTc2NCwiaWF0IjoxNzc3NzI0ODY0LCJqdGkiOiIyYTg5NTQ3Yi1lODYyLTQ5ZDQtYTBkYi1jYTBmMmY2ODQxNmEifQ.uSZ2ran1RCUASmGPRyjIGDKd5WB73LcpKK80v99W8p8
+@refreshToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMSwidHlwZSI6InJlZnJlc2giLCJleHAiOjE3NzgzMjk2NjQsImlhdCI6MTc3NzcyNDg2NCwianRpIjoiZDE2ZWNiOGMtNmMxOS00NTljLTkwYmItMDg3ZTJmNDg4N2MwIn0.iuO_zb3viUMwkuABUZH7fJu2jjj1f4MTcBEs_rJMkTc
+
+@authHeader = Bearer {{accessToken}}
+
+#####################################
+# Login — run this first so {{login.response.body...}} works (VS Code REST Client)
+# If access_token is empty, try: {{login.response.body.$.access_token}}
+#####################################
+
+### Login
+# @name login
+POST {{host}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "test2@gmail.com",
+  "password": "password123"
+}
+#####################################
+# Customers (Bearer from Login)
+#####################################
+
+### List customers
+GET {{host}}/api/v1/customers
+Authorization: Bearer {{login.response.body.access_token}}
+
+### Create customer
+POST {{host}}/api/v1/customers
+Authorization: Bearer {{login.response.body.access_token}}
+Content-Type: application/json
+
+{
+  "name": "John lee",
+  "email": "john.lee@example.com",
+  "phone": "12345678290",
+  "address": "123 Main St, Anytown, USA"
+}
+
+### Get customer by ID
+GET {{host}}/api/v1/customers/1
+Authorization: Bearer {{login.response.body.access_token}}
+
+### Update customer
+PUT {{host}}/api/v1/customers/1
+Authorization: Bearer {{login.response.body.access_token}}
+Content-Type: application/json
+
+{
+  "name": "John D.",
+  "email": "john.doe@example.com"
+}
+
+### Delete customer
+DELETE {{host}}/api/v1/customers/1
+Authorization: Bearer {{login.response.body.access_token}}
+
+#####################################
+# Manual token (set @accessToken at top)
+#####################################
+
+### List customers (manual Bearer)
+GET {{host}}/api/v1/customers
+Authorization: {{authHeader}}
